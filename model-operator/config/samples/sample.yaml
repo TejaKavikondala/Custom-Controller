@@ -1,0 +1,36 @@
+---
+# Sample ModelDeployment CR — simulates deploying Llama 3 8B
+# On kind: GPU pods stay Pending (no GPU nodes); that's expected for the demo.
+# The state machine still runs all 3 phases: Provisioning → Downloading → Ready.
+#
+# To watch the lifecycle:
+#   kubectl get modeldeployment llama3-demo -w
+#   kubectl describe modeldeployment llama3-demo
+#   kubectl get pvc,job,deploy -l app.kubernetes.io/instance=llama3-demo
+apiVersion: models.hpe.io/v1
+kind: ModelDeployment
+metadata:
+  name: llama3-demo
+  namespace: default
+  labels:
+    team: platform-ai
+    environment: dev
+spec:
+  modelName: meta-llama/Meta-Llama-3-8B-Instruct
+  replicas: 1
+  storageSize: 1Gi       # 10Gi+ in production; 1Gi is enough for the demo busybox job
+  gpuPerPod: 1           # pods stay Pending on kind — comment out GPU limit in controller to skip
+  storageClass: standard # kind default; use HPE GreenLake FS class in production
+---
+# Minimal example — just the required fields
+apiVersion: models.hpe.io/v1
+kind: ModelDeployment
+metadata:
+  name: mistral-minimal
+  namespace: default
+spec:
+  modelName: mistralai/Mistral-7B-Instruct-v0.2
+  replicas: 1
+  storageSize: 500Mi
+  gpuPerPod: 0           # 0 GPUs → pods actually schedule on kind (no GPU requirement)
+  storageClass: standard

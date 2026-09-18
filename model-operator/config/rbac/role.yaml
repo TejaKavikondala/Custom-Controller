@@ -1,0 +1,56 @@
+---
+# ClusterRole for the model-operator
+# Grants the controller permission to manage all the resources it creates
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: model-operator-role
+rules:
+  # ModelDeployment CRD — full access to the CR and its status subresource
+  - apiGroups: ["models.hpe.io"]
+    resources: ["modeldeployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["models.hpe.io"]
+    resources: ["modeldeployments/status"]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: ["models.hpe.io"]
+    resources: ["modeldeployments/finalizers"]
+    verbs: ["update"]
+
+  # PersistentVolumeClaims — Phase 1 provisioning
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Jobs — Phase 2 download
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Deployments — Phase 3 inference
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Pods — for ReadyReplicas count in status
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+  # Events — for recording controller events (optional but useful for debugging)
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: model-operator-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: model-operator-role
+  apiGroup: rbac.authorization.k8s.io
