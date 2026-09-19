@@ -202,9 +202,9 @@ The operator **pattern** (CRD → controller → state machine → owned resourc
 
 ---
 
-## Interview talking points
+## Key points
 
-**"Walk me through your operator's reconcile loop."**
+**" Operator's reconcile loop."**
 > The reconcile function implements a 3-phase state machine. Each phase creates a resource and re-queues until that resource reaches its terminal state — PVC Bound, Job Complete, Deployment pods Ready. Owner references ensure automatic garbage collection when the CR is deleted.
 
 **"How does your operator handle crashes or restarts?"**
